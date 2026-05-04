@@ -28,42 +28,45 @@ variable "vnet_address_space" {
 }
 
 variable "subnets" {
-    description = "The address space for the subnet."
+    description = "a map of names and address prefixes for the subnets."
     type        = map(object({
         name = string
         address_prefix = string
+        private_endpoint_network_policies = string
     }))
 
     default     = {
         bastion = {
             name = "AzureBastionSubnet"
             address_prefix = "10.100.0.0/26"
+            private_endpoint_network_policies = "Disabled"
         },
         anf = {
             name = "0-anf"
             address_prefix = "10.100.0.64/26"
+            private_endpoint_network_policies = "Disabled"
         },
         shared = {
             name = "1-shared"
             address_prefix = "10.100.0.128/27"
+            private_endpoint_network_policies = "Disabled"
         },
         private_endpoints = {
             name = "2-private-endpoints"
             address_prefix = "10.100.0.160/28"
+            private_endpoint_network_policies = "Enabled"
         },
         cyclecloud = {
             name = "3-cyclecloud"
             address_prefix = "10.100.0.172/29"
+            private_endpoint_network_policies = "Disabled"
         },
         cluster = {
             name = "4-cluster"
             address_prefix = "10.100.1.0/23"
+            private_endpoint_network_policies = "Disabled"
         }
     }
-}
-
-variable "public_ip_names" {
-    description = "value"
 }
 
 variable "admin_username" {
@@ -79,4 +82,10 @@ variable "vm_skus" {
         imaging = "Standard_D2ads_v6"
         cyclecloud = "Standard_D4ads_v6"
     }
+}
+
+variable "current_ip_address" {
+    description = "The current public IP address of the user running terraform, used for NSG rules to allow access to the bastion host."
+    type        = string
+    default     = ""
 }

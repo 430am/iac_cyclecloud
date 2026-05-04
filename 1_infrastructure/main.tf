@@ -119,12 +119,3 @@ ephemeral "tls_private_key" "cyclecloud" {
 ephemeral "tls_public_key" "cyclecloud" {
     private_key_openssh = ephemeral.tls_private_key.cyclecloud.private_key_openssh
 }
-
-resource "azurerm_storage_account" "bootdiag" {
-    account_replication_type = "LRS"
-    account_tier = "Standard"
-    location = azurerm_resource_group.cyclecloud[1].location
-    name = "bootdiag${random_pet.naming.id}"
-    resource_group_name = azurerm_resource_group.cyclecloud[1].name
-    tags = local.common_tags
-}

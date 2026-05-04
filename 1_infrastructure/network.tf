@@ -1,6 +1,6 @@
 resource "azurerm_public_ip" "bastion" {
     allocation_method = "Static"
-    location = azurerm_resource_group.cyclecloud[0].location
+    location = var.location
     name = "pip-${random_pet.naming.id}-bastion"
     resource_group_name = azurerm_resource_group.cyclecloud[0].name
     sku = "Standard"
@@ -9,7 +9,7 @@ resource "azurerm_public_ip" "bastion" {
 
 resource "azurerm_public_ip" "natgateway" {
     allocation_method = "Static"
-    location = azurerm_resource_group.cyclecloud[0].location
+    location = var.location
     name = "pip-${random_pet.naming.id}-natgateway"
     resource_group_name = azurerm_resource_group.cyclecloud[0].name
     sku = "Standard"
@@ -17,7 +17,7 @@ resource "azurerm_public_ip" "natgateway" {
 }
 
 resource "azurerm_virtual_network" "cyclecloud" {
-    location = azurerm_resource_group.cyclecloud[0].location
+    location = var.location
     name = "vnet-${random_pet.naming.id}"
     resource_group_name = azurerm_resource_group.cyclecloud[0].name
     address_space = var.vnet_address_space
@@ -30,10 +30,11 @@ resource "azurerm_subnet" "cyclecloud" {
     resource_group_name = azurerm_resource_group.cyclecloud[0].name
     virtual_network_name = azurerm_virtual_network.cyclecloud.name
     address_prefixes = [each.value.address_prefix]
+    private_endpoint_network_policies = each.value.private_endpoint_network_policies
 }
 
 resource "azurerm_bastion_host" "cyclecloud" {
-    location = azurerm_resource_group.cyclecloud[0].location
+    location = var.location
     name = "bastion-${random_pet.naming.id}"
     resource_group_name = azurerm_resource_group.cyclecloud[0].name
     sku = "Standard"
@@ -48,7 +49,7 @@ resource "azurerm_bastion_host" "cyclecloud" {
 }
 
 resource "azurerm_nat_gateway" "cyclecloud" {
-    location = azurerm_resource_group.cyclecloud[0].location
+    location = var.location
     name = "natgateway-${random_pet.naming.id}"
     resource_group_name = azurerm_resource_group.cyclecloud[0].name
     sku_name = "Standard"
