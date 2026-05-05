@@ -47,35 +47,9 @@ resource "azurerm_monitor_diagnostic_setting" "nat_gateway" {
   log_analytics_destination_type = "Dedicated"
   target_resource_id = azurerm_nat_gateway.cyclecloud.id
 
-  enabled_log {
-    category = "NatGatewayFlowlogsV1"
-  }
-
     enabled_metric {
     category = "AllMetrics"
   }
-}
-
-resource "azurerm_monitor_diagnostic_setting" "pe_kv" {
-    name = "diag-${azurerm_private_endpoint.kv.name}"
-    target_resource_id = azurerm_private_endpoint.kv.id
-    log_analytics_workspace_id = azurerm_log_analytics_workspace.cyclecloud.id
-    log_analytics_destination_type = "Dedicated"
-    
-    enabled_metric {
-      category = "AllMetrics"
-    }
-}
-
-resource "azurerm_monitor_diagnostic_setting" "pe_monitoring" {
-    name = "diag-${azurerm_private_endpoint.monitoring.name}"
-    target_resource_id = azurerm_private_endpoint.monitoring.id
-    log_analytics_workspace_id = azurerm_log_analytics_workspace.cyclecloud.id
-    log_analytics_destination_type = "Dedicated"
-    
-    enabled_metric {
-      category = "AllMetrics"
-    }
 }
 
 resource "azurerm_monitor_diagnostic_setting" "public_ip_bastion" {
@@ -202,7 +176,7 @@ resource "azurerm_private_endpoint" "monitoring" {
 }
 
 resource "azurerm_monitor_private_link_scoped_service" "monitoring" {
-    linked_resource_id = azurerm_monitor_private_link_scope.monitoring.id
+    linked_resource_id = azurerm_log_analytics_workspace.cyclecloud.id
     name = "scoped-service-${random_pet.naming.id}"
     resource_group_name = azurerm_resource_group.cyclecloud.name
     scope_name = azurerm_monitor_private_link_scope.monitoring.name
