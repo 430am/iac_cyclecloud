@@ -74,21 +74,3 @@ resource "azurerm_role_assignment" "kv_admin" {
   role_definition_name = "Key Vault Administrator"
   scope                = azurerm_key_vault.cyclecloud.id
 }
-
-resource "azurerm_monitor_diagnostic_setting" "key_vault" {
-  name               = "diag-${azurerm_key_vault.cyclecloud.name}"
-  storage_account_id = azurerm_storage_account.bootdiag.id
-  target_resource_id = azurerm_key_vault.cyclecloud.id
-
-  enabled_log {
-    category = "AuditEvent"
-  }
-
-  enabled_log {
-    category = "AzurePolicyEvaluationDetails"
-  }
-
-  enabled_metric {
-    category = "AllMetrics"
-  }
-}

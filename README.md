@@ -17,6 +17,7 @@ This repository provides Terraform configurations to deploy and manage Azure Cyc
 - **Identity** - User-assigned managed identities for secure service authentication
 - **DNS** - Private DNS zones for secure internal communication
 - **Storage** - Azure Storage accounts with encrypted blob services
+- **Monitoring** - Log Analytics workspace with diagnostic settings and private endpoints for secure monitoring
 
 ## Prerequisites
 
@@ -78,12 +79,37 @@ Key variables can be customized in `variables.tf`:
 - Private DNS zones for internal service communication
 - User-assigned managed identities for service authentication
 - Encrypted storage accounts with secure blob services
+- Log Analytics workspace with private endpoints for secure monitoring and diagnostics
+- All diagnostic data routed through Log Analytics with dedicated private connectivity
+
+## Monitoring and Diagnostics
+
+The infrastructure includes comprehensive monitoring and diagnostics:
+
+- **Log Analytics Workspace** - Centralized logging for all diagnostic data
+- **Diagnostic Settings** - Configured for:
+  - Azure Bastion Host
+  - Key Vault
+  - NAT Gateway
+  - Public IP addresses
+  - Virtual Network
+  - Private Endpoints
+- **Private DNS Zones** - For secure internal communication with Azure Monitor services:
+  - `monitor.azure.com`
+  - `ods.opinsights.azure.com`
+  - `oms.opinsights.azure.com`
+  - `agentservice.azure.com`
+  - `blob.core.windows.net`
+- **Azure Monitor Private Link Scope** - Enables private connectivity to monitoring services
+- **Private Endpoints** - Secure connections to Log Analytics and monitoring services
 
 ## Files
 
 - `providers.tf` - Terraform provider configuration
 - `main.tf` - Core resource definitions (identity, roles, resource groups)
 - `network.tf` - Virtual networking infrastructure
+- `keyvault.tf` - Key Vault and secrets management with private endpoints
+- `monitoring.tf` - Log Analytics workspace, diagnostic settings, and monitoring infrastructure
 - `variables.tf` - Input variable definitions
 - `locals.tf` - Local value definitions
 - `.gitignore` - Git ignore patterns for Terraform artifacts

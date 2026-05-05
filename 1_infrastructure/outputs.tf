@@ -28,21 +28,6 @@ output "resource_group_name" {
   value       = azurerm_resource_group.cyclecloud.name
 }
 
-output "storage_account_id" {
-  description = "The ID of the Storage Account"
-  value       = azurerm_storage_account.bootdiag.id
-}
-
-output "storage_account_name" {
-  description = "The name of the Storage Account"
-  value       = azurerm_storage_account.bootdiag.name
-}
-
-output "storage_account_primary_blob_endpoint" {
-  description = "The primary blob endpoint of the Storage Account"
-  value       = azurerm_storage_account.bootdiag.primary_blob_endpoint
-}
-
 output "virtual_network_address_space" {
   description = "The address space of the Virtual Network"
   value       = azurerm_virtual_network.cyclecloud.address_space
@@ -56,4 +41,19 @@ output "virtual_network_id" {
 output "virtual_network_name" {
   description = "The name of the Virtual Network"
   value       = azurerm_virtual_network.cyclecloud.name
+}
+
+output "log_analytics_workspace_id" {
+  description = "The ID of the Log Analytics Workspace"
+  value       = azurerm_log_analytics_workspace.cyclecloud.id
+}
+
+output "log_analytics_workspace_name" {
+  description = "The name of the Log Analytics Workspace"
+  value       = azurerm_log_analytics_workspace.cyclecloud.name
+}
+
+output "log_analytics_workspace_workspace_id" {
+  description = "The Workspace ID of the Log Analytics Workspace (for agent configuration)"
+  value       = azurerm_log_analytics_workspace.cyclecloud.workspace_id
 }
