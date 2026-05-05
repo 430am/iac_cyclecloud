@@ -27,11 +27,13 @@ override.tf.json
 *.tfvars.json
 *.auto.tfvars
 *.auto.tfvars.json
+*.pkrvars.hcl
 
 # Allow checked-in safe examples
 !*.example.tfvars
 !*.example.tfvars.json
 !1_infrastructure/environments/example.tfvars
+!2_packer_image/environments/example.pkrvars.hcl
 
 # Common secret files
 .env

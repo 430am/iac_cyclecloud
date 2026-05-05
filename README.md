@@ -1,115 +1,74 @@
 # IAC CycleCloud
 
-Infrastructure-as-Code (IaC) for deploying Azure CycleCloud infrastructure using Terraform.
+Infrastructure-as-Code for deploying Azure CycleCloud using Terraform and Packer.
 
-## Overview
+## Repository structure
 
-This repository provides Terraform configurations to deploy and manage Azure CycleCloud infrastructure with enterprise-grade security and compliance features.
+| Folder | Tool | Purpose |
+|---|---|---|
+| [`1_infrastructure/`](1_infrastructure/README.md) | Terraform | Core Azure infrastructure — networking, identity, Key Vault, Shared Image Gallery, and monitoring |
+| [`2_packer_image/`](2_packer_image/README.md) | Packer | Custom CycleCloud server image built on Ubuntu 24.04 DSVM and published to the SIG |
 
-## Architecture
+## Deployment order
 
-### Components
+These two stages must be run in order. Stage 2 depends on the Shared Image Gallery created by stage 1.
 
-**1_infrastructure/** - Core Azure infrastructure deployment including:
-- **Resource Groups** - Organized resource grouping for network, shared services, and CycleCloud
-- **Virtual Networking** - VNet with multiple subnets for bastion, ANF, shared services, and private endpoints
-- **Security** - Custom role definitions providing least-privilege access to CycleCloud services
-- **Identity** - User-assigned managed identities for secure service authentication
-- **DNS** - Private DNS zones for secure internal communication
-- **Storage** - Azure Storage accounts with encrypted blob services
-- **Monitoring** - Log Analytics workspace with diagnostic settings and private endpoints for secure monitoring
+```
+1_infrastructure  →  2_packer_image
+(Terraform)            (Packer)
+```
+
+### Stage 1 — Infrastructure
+
+```bash
+cd 1_infrastructure/
+cp environments/example.tfvars environments/creds.tfvars
+# Fill in credentials and CURRENT_IP_ADDRESS in creds.tfvars
+
+export ARM_SUBSCRIPTION_ID="<subscription-id>"
+export ARM_CLIENT_ID="<client-id>"
+export ARM_CLIENT_SECRET="<client-secret>"
+export ARM_TENANT_ID="<tenant-id>"
+
+terraform init
+terraform apply -var-file=environments/creds.tfvars
+```
+
+### Stage 2 — CycleCloud image
+
+```bash
+cd 2_packer_image/
+cp environments/example.pkrvars.hcl environments/creds.pkrvars.hcl
+# Fill in subscription_id and SIG values from terraform output:
+#   cd ../1_infrastructure
+#   terraform output -raw resource_group_name
+#   terraform output -raw sig_name
+#   terraform output -raw sig_image_name
+
+az login
+packer init cyclecloud-server.pkr.hcl
+packer build -var-file=environments/creds.pkrvars.hcl cyclecloud-server.pkr.hcl
+```
 
 ## Prerequisites
 
-- Terraform >= 1.0
-- Azure CLI configured with appropriate credentials
-- Azure subscription with sufficient permissions
+| Tool | Minimum version |
+|---|---|
+| Terraform | 1.0 |
+| Packer | 1.9 |
+| Azure CLI | any recent |
 
-## Providers
+The deploying identity needs permission to create resources and assign RBAC roles at subscription scope.
 
-- `azurerm` - Azure Resource Manager (v4.x)
-- `azuread` - Azure Active Directory (v3.x)
-- `random` - Random resource naming (v3.x)
-- `tls` - TLS certificate generation (v4.x)
+## Security notes
 
-## Deployment
+- All credential files (`creds.tfvars`, `creds.pkrvars.hcl`) are git-ignored.
+- Key Vault stores VM passwords and SSH keys generated ephemerally at `terraform apply` time.
+- CycleCloud uses a least-privilege custom RBAC role.
+- Azure Monitor connectivity is private via a Monitor Private Link Scope.
+- Bastion provides SSH/RDP access without exposing VMs to the public internet.
 
-### Deploy infrastructure
-```bash
-cd 1_infrastructure/
-terraform init
-terraform plan
-terraform apply
-```
+## Detailed documentation
 
-### Environment credentials (tfvars)
-
-An example credentials file is available at `1_infrastructure/environments/example.tfvars`.
-
-To use it locally:
-
-```bash
-cp 1_infrastructure/environments/example.tfvars 1_infrastructure/environments/creds.tfvars
-# Edit creds.tfvars and replace placeholders with your values.
-```
-
-Export the values from `creds.tfvars` before running Terraform:
-
-```bash
-export ARM_SUBSCRIPTION_ID="<your-subscription-id>"
-export ARM_CLIENT_ID="<your-client-id>"
-export ARM_CLIENT_SECRET="<your-client-secret>"
-export ARM_TENANT_ID="<your-tenant-id>"
-```
-
-Set `CURRENT_IP_ADDRESS` in `creds.tfvars` (CIDR format, for example `203.0.113.10/32`) to include your current public IP in the Terraform allowlist used by storage account network rules.
-
-### Variable Configuration
-
-Key variables can be customized in `variables.tf`:
-- `location` - Azure region (default: southcentralus)
-- `resource_groups` - RG names to create (default: network, shared, cyclecloud)
-- `vnet_address_space` - Virtual network CIDR (default: 10.100.0.0/16)
-- `subnets` - Subnet definitions and address prefixes
-- `tags` - Resource tags for organization and tracking
-
-## Security
-
-- Custom RBAC role with minimal required permissions
-- Private DNS zones for internal service communication
-- User-assigned managed identities for service authentication
-- Encrypted storage accounts with secure blob services
-- Log Analytics workspace with private endpoints for secure monitoring and diagnostics
-- All diagnostic data routed through Log Analytics with dedicated private connectivity
-
-## Monitoring and Diagnostics
-
-The infrastructure includes comprehensive monitoring and diagnostics:
-
-- **Log Analytics Workspace** - Centralized logging for all diagnostic data
-- **Diagnostic Settings** - Configured for:
-  - Azure Bastion Host
-  - Key Vault
-  - NAT Gateway
-  - Public IP addresses
-  - Virtual Network
-  - Private Endpoints
-- **Private DNS Zones** - For secure internal communication with Azure Monitor services:
-  - `monitor.azure.com`
-  - `ods.opinsights.azure.com`
-  - `oms.opinsights.azure.com`
-  - `agentservice.azure.com`
-  - `blob.core.windows.net`
-- **Azure Monitor Private Link Scope** - Enables private connectivity to monitoring services
-- **Private Endpoints** - Secure connections to Log Analytics and monitoring services
-
-## Files
-
-- `providers.tf` - Terraform provider configuration
-- `main.tf` - Core resource definitions (identity, roles, resource groups)
-- `network.tf` - Virtual networking infrastructure
-- `keyvault.tf` - Key Vault and secrets management with private endpoints
-- `monitoring.tf` - Log Analytics workspace, diagnostic settings, and monitoring infrastructure
-- `variables.tf` - Input variable definitions
-- `locals.tf` - Local value definitions
-- `.gitignore` - Git ignore patterns for Terraform artifacts
+- [1_infrastructure/README.md](1_infrastructure/README.md) — infrastructure components, variables, outputs, and deployment steps
+- [2_packer_image/README.md](2_packer_image/README.md) — image build process, variables, authentication, and deployment steps

@@ -28,6 +28,16 @@ output "resource_group_name" {
   value       = azurerm_resource_group.cyclecloud.name
 }
 
+output "sig_name" {
+  description = "The name of the Shared Image Gallery"
+  value       = azurerm_shared_image_gallery.cyclecloud.name
+}
+
+output "sig_image_name" {
+  description = "The name of the Shared Image definition"
+  value       = azurerm_shared_image.cyclecloud.name
+}
+
 output "virtual_network_address_space" {
   description = "The address space of the Virtual Network"
   value       = azurerm_virtual_network.cyclecloud.address_space
