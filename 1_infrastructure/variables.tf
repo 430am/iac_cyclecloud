@@ -10,6 +10,12 @@ variable "current_ip_address" {
   default     = ""
 }
 
+variable "CURRENT_IP_ADDRESS" {
+  description = "Compatibility input for credentials tfvars files; if set, this CIDR is used when current_ip_address is empty."
+  type        = string
+  default     = ""
+}
+
 variable "local_ip_address_prefixes" {
   description = "A list of CIDR blocks representing the local IP address ranges that should be allowed to access the bastion host."
   type        = list(string)

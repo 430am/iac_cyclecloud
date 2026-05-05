@@ -61,6 +61,8 @@ export ARM_CLIENT_SECRET="<your-client-secret>"
 export ARM_TENANT_ID="<your-tenant-id>"
 ```
 
+Set `CURRENT_IP_ADDRESS` in `creds.tfvars` (CIDR format, for example `203.0.113.10/32`) to include your current public IP in the Terraform allowlist used by storage account network rules.
+
 ### Variable Configuration
 
 Key variables can be customized in `variables.tf`:

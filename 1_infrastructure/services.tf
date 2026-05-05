@@ -168,7 +168,7 @@ resource "azurerm_storage_account_network_rules" "bootdiag" {
 
   bypass                     = ["AzureServices"]
   default_action             = "Deny"
-  ip_rules                   = var.local_ip_address_prefixes
+  ip_rules                   = local.effective_ip_allowlist
   virtual_network_subnet_ids = [azurerm_subnet.cyclecloud["private_endpoints"].id]
 }
 
