@@ -31,6 +31,7 @@ override.tf.json
 # Allow checked-in safe examples
 !*.example.tfvars
 !*.example.tfvars.json
+!1_infrastructure/environments/example.tfvars
 
 # Common secret files
 .env

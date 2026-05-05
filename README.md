@@ -41,6 +41,26 @@ terraform plan
 terraform apply
 ```
 
+### Environment credentials (tfvars)
+
+An example credentials file is available at `1_infrastructure/environments/example.tfvars`.
+
+To use it locally:
+
+```bash
+cp 1_infrastructure/environments/example.tfvars 1_infrastructure/environments/creds.tfvars
+# Edit creds.tfvars and replace placeholders with your values.
+```
+
+Export the values from `creds.tfvars` before running Terraform:
+
+```bash
+export ARM_SUBSCRIPTION_ID="<your-subscription-id>"
+export ARM_CLIENT_ID="<your-client-id>"
+export ARM_CLIENT_SECRET="<your-client-secret>"
+export ARM_TENANT_ID="<your-tenant-id>"
+```
+
 ### Variable Configuration
 
 Key variables can be customized in `variables.tf`:
