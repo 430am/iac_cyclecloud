@@ -41,12 +41,16 @@ resource "azurerm_storage_account" "bootdiag" {
   https_traffic_only_enabled      = true
   min_tls_version                 = "TLS1_2"
   tags                            = local.common_tags
+
+  lifecycle {
+    ignore_changes = [shared_access_key_enabled]
+  }
 }
 
 resource "azurerm_monitor_diagnostic_setting" "bastion_host" {
-  name                       = "diag-${azurerm_bastion_host.cyclecloud.name}"
-  storage_account_id         = azurerm_storage_account.bootdiag.id
-  target_resource_id         = azurerm_bastion_host.cyclecloud.id
+  name               = "diag-${azurerm_bastion_host.cyclecloud.name}"
+  storage_account_id = azurerm_storage_account.bootdiag.id
+  target_resource_id = azurerm_bastion_host.cyclecloud.id
 
   enabled_log {
     category = "BastionAuditLogs"
@@ -165,6 +169,6 @@ resource "azurerm_storage_account_network_rules" "bootdiag" {
   bypass                     = ["AzureServices"]
   default_action             = "Deny"
   ip_rules                   = var.local_ip_address_prefixes
-  virtual_network_subnet_ids = [azurerm_subnet.cyclecloud["cyclecloud"].id]
+  virtual_network_subnet_ids = [azurerm_subnet.cyclecloud["private_endpoints"].id]
 }
 

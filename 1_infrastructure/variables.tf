@@ -41,12 +41,12 @@ variable "subnets" {
       private_endpoint_network_policies = "Disabled"
     }
     cluster = {
-      address_prefix                    = "10.100.1.0/23"
+      address_prefix                    = "10.100.2.0/23"
       name                              = "4-cluster"
       private_endpoint_network_policies = "Disabled"
     }
     cyclecloud = {
-      address_prefix                    = "10.100.0.172/29"
+      address_prefix                    = "10.100.0.176/29"
       name                              = "3-cyclecloud"
       private_endpoint_network_policies = "Disabled"
     }

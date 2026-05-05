@@ -111,14 +111,6 @@ resource "azurerm_user_assigned_identity" "cyclecloud" {
   tags                = local.common_tags
 }
 
-resource "tls_private_key" "cyclecloud" {
-  algorithm = "ED25519"
-}
-
-data "tls_public_key" "cyclecloud" {
-  private_key_openssh = tls_private_key.cyclecloud.private_key_openssh
-}
-
 ephemeral "tls_private_key" "cyclecloud_ephemeral" {
   algorithm = "ED25519"
 }
