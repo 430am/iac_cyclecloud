@@ -6,4 +6,4 @@ resourceId=$(terraform -chdir="$CYCLECLOUD_DIR" output -raw cyclecloud_vm_id)
 resourceGroup=$(echo "$resourceId" | cut -d'/' -f5)
 bastion=$(terraform -chdir="$INFRA_DIR" output -raw bastion_host_name)
 
-az network bastion tunnel --name "$bastion" --resource-group "$resourceGroup" --target-resource-id "$resourceId" --resource-port 443 --port 8443
+az network bastion tunnel --name "$bastion" --resource-group "$resourceGroup" --target-resource-id "$resourceId" --resource-port 8080 --port 8080
