@@ -38,35 +38,6 @@ resource "azurerm_key_vault_secret" "public_key" {
   value_wo_version = 1
 }
 
-resource "azurerm_private_dns_zone" "kv" {
-  name                = local.dns_names.private_dns_zone_kv
-  resource_group_name = azurerm_resource_group.cyclecloud.name
-  tags                = local.common_tags
-}
-
-resource "azurerm_private_dns_zone_virtual_network_link" "kv" {
-  name                  = "kv-link"
-  private_dns_zone_name = azurerm_private_dns_zone.kv.name
-  resource_group_name   = azurerm_resource_group.cyclecloud.name
-  virtual_network_id    = azurerm_virtual_network.cyclecloud.id
-}
-
-resource "azurerm_private_endpoint" "kv" {
-  location            = var.location
-  name                = "pe-${random_pet.naming.id}-kv"
-  resource_group_name = azurerm_resource_group.cyclecloud.name
-  subnet_id           = azurerm_subnet.cyclecloud["private_endpoints"].id
-
-  private_service_connection {
-    is_manual_connection           = false
-    name                           = "kv-connection"
-    private_connection_resource_id = azurerm_key_vault.cyclecloud.id
-    subresource_names              = ["vault"]
-  }
-
-  tags = local.common_tags
-}
-
 resource "azurerm_role_assignment" "kv_admin" {
   depends_on = [azurerm_key_vault.cyclecloud]
 

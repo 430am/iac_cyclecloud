@@ -49,7 +49,6 @@ resource "azurerm_subnet" "cyclecloud" {
 
   address_prefixes                  = [each.value.address_prefix]
   name                              = each.value.name
-  private_endpoint_network_policies = each.value.private_endpoint_network_policies
   resource_group_name               = azurerm_resource_group.cyclecloud.name
   virtual_network_name              = azurerm_virtual_network.cyclecloud.name
 }

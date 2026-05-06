@@ -33,38 +33,31 @@ variable "subnets" {
   type = map(object({
     address_prefix                    = string
     name                              = string
-    private_endpoint_network_policies = string
   }))
   default = {
     anf = {
       address_prefix                    = "10.100.2.64/26"
       name                              = "Storage"
-      private_endpoint_network_policies = "Disabled"
     }
     bastion = {
       address_prefix                    = "10.100.2.0/26"
       name                              = "AzureBastionSubnet"
-      private_endpoint_network_policies = "Disabled"
     }
     cluster = {
       address_prefix                    = "10.100.0.0/23"
       name                              = "Cluster"
-      private_endpoint_network_policies = "Disabled"
     }
     cyclecloud = {
       address_prefix                    = "10.100.2.192/27"
       name                              = "CycleCloud"
-      private_endpoint_network_policies = "Disabled"
     }
     private_endpoints = {
       address_prefix                    = "10.100.2.128/28"
       name                              = "PrivateEndpoints"
-      private_endpoint_network_policies = "Enabled"
     }
     shared = {
       address_prefix                    = "10.100.2.224/27"
       name                              = "SharedServices"
-      private_endpoint_network_policies = "Disabled"
     }
   }
 }
