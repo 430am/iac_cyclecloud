@@ -6,13 +6,14 @@ in the Shared Image Gallery created by `1_infrastructure`.
 
 ## What the build does
 
-1. Starts a temporary Azure VM from the `ubuntu-hpc 2404` marketplace image.
-2. Installs **Azure CLI** via the official Microsoft install script.
-3. Adds the Microsoft Linux package repository and installs **CycleCloud** (`cyclecloud8` or
-   `cyclecloud` depending on what the feed exposes).
-4. Verifies both tools are functional.
-5. Runs `waagent -deprovision+user` and `cloud-init clean` to generalise the VM.
-6. Publishes the resulting image version to the target Shared Image Gallery definition.
+1. Starts a temporary Azure VM from the `ubuntu-hpc 2404` marketplace image (in an ephemeral resource group, VNet, and public IP managed by Packer).
+2. Waits for cloud-init to finish, then disables `unattended-upgrades` and the `apt-daily` timers so they don't hold the dpkg lock during the build.
+3. Updates the system and installs base packages (`curl`, `gnupg`, `jq`, `lsb-release`, `openjdk-8-jre`, etc.).
+4. Installs **Azure CLI** via the official Microsoft install script.
+5. Adds the Microsoft `packages.microsoft.com/repos/cyclecloud stable` repository (signed-by `/etc/apt/keyrings/microsoft.gpg`), pins openjdk-8 as the system default with `update-java-alternatives`, then installs **CycleCloud** (`cyclecloud8` or `cyclecloud`).
+6. Writes `/opt/cycle_server/config/java_home = /usr/lib/jvm/java-8-openjdk-amd64` so a future default-Java change won't break CycleCloud.
+7. Cleans apt caches, runs `waagent -deprovision+user` and `cloud-init clean` to generalise the VM.
+8. Publishes the resulting image version to the target Shared Image Gallery definition.
 
 ## Prerequisites
 
@@ -88,9 +89,12 @@ sig_image_name          = "<image-name from step 2>"
 ```bash
 cd 2_packer_image/
 az login                          # only needed when use_azure_cli_auth = true
-packer init cyclecloud-server.pkr.hcl
-packer build -var-file=environments/creds.pkrvars.hcl cyclecloud-server.pkr.hcl
+packer init .
+packer validate -var-file=environments/creds.pkrvars.hcl .
+packer build    -var-file=environments/creds.pkrvars.hcl .
 ```
+
+> Always invoke Packer against the **directory** (`.`) rather than a single file, so it loads `variables.pkr.hcl` alongside the source/build blocks.
 
 ### Updating an existing image
 
