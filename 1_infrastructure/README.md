@@ -34,7 +34,7 @@ Subscription
 |---|---|
 | `azurerm_resource_group` | Single resource group for all components |
 | `azurerm_virtual_network` | VNet with configurable address space (default `10.100.0.0/16`) |
-| `azurerm_subnet` | Six subnets serving Bastion, ANF, shared services, private endpoints, CycleCloud, and cluster nodes |
+| `azurerm_subnet` | Six subnets serving Bastion, ANF (delegated to `Microsoft.Netapp/volumes`), shared services, private endpoints, CycleCloud, and cluster nodes |
 | `azurerm_bastion_host` | Standard-SKU Bastion with copy-paste and native client tunnelling |
 | `azurerm_nat_gateway` | Outbound internet connectivity for cluster, cyclecloud, and shared subnets |
 | `azurerm_key_vault` | Stores the VM password, SSH private key, and SSH public key generated at apply time |
@@ -95,6 +95,8 @@ Subscription
 | `resource_group_location` | Deployment region |
 | `key_vault_name` | Key Vault name |
 | `key_vault_uri` | Key Vault URI |
+| `key_vault_public_key_secret_name` | Key Vault secret name containing the CycleCloud SSH public key |
+| `key_vault_private_key_secret_name` | Key Vault secret name containing the CycleCloud SSH private key |
 | `virtual_network_name` | VNet name |
 | `log_analytics_workspace_name` | Log Analytics workspace name |
 

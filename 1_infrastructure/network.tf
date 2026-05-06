@@ -47,10 +47,23 @@ resource "azurerm_public_ip" "natgateway" {
 resource "azurerm_subnet" "cyclecloud" {
   for_each = var.subnets
 
-  address_prefixes                  = [each.value.address_prefix]
-  name                              = each.value.name
-  resource_group_name               = azurerm_resource_group.cyclecloud.name
-  virtual_network_name              = azurerm_virtual_network.cyclecloud.name
+  address_prefixes     = [each.value.address_prefix]
+  name                 = each.value.name
+  resource_group_name  = azurerm_resource_group.cyclecloud.name
+  virtual_network_name = azurerm_virtual_network.cyclecloud.name
+
+  dynamic "delegation" {
+    for_each = each.key == "anf" ? [1] : []
+
+    content {
+      name = "anf-delegation"
+
+      service_delegation {
+        actions = ["Microsoft.Network/networkinterfaces/*", "Microsoft.Network/virtualNetworks/subnets/join/action"]
+        name    = "Microsoft.Netapp/volumes"
+      }
+    }
+  }
 }
 
 resource "azurerm_subnet_nat_gateway_association" "cyclecloud" {

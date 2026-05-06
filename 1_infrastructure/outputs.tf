@@ -13,6 +13,16 @@ output "key_vault_uri" {
   value       = azurerm_key_vault.cyclecloud.vault_uri
 }
 
+output "key_vault_private_key_secret_name" {
+  description = "The secret name storing the CycleCloud private SSH key"
+  value       = azurerm_key_vault_secret.private_key.name
+}
+
+output "key_vault_public_key_secret_name" {
+  description = "The secret name storing the CycleCloud public SSH key"
+  value       = azurerm_key_vault_secret.public_key.name
+}
+
 output "resource_group_id" {
   description = "The ID of the Resource Group"
   value       = azurerm_resource_group.cyclecloud.id
