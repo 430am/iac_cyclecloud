@@ -1,6 +1,6 @@
 resource "azurerm_key_vault" "cyclecloud" {
   location                   = var.location
-  name                       = "kv${random_pet.naming.id}"
+  name                       = substr("kv${random_pet.naming.id}", 0, 24)
   purge_protection_enabled   = false
   resource_group_name        = azurerm_resource_group.cyclecloud.name
   sku_name                   = "standard"

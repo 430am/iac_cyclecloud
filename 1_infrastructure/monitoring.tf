@@ -1,17 +1,36 @@
 resource "azurerm_log_analytics_workspace" "cyclecloud" {
-    location = var.location
-    name = "${random_pet.naming.id}logs"
-    resource_group_name = azurerm_resource_group.cyclecloud.name
-    sku = "PerGB2018"
-    retention_in_days = 30
-    tags = local.common_tags
+  location            = var.location
+  name                = "${random_pet.naming.id}logs"
+  resource_group_name = azurerm_resource_group.cyclecloud.name
+  sku                 = "PerGB2018"
+  retention_in_days   = 30
+  tags                = local.common_tags
+
+  identity {
+    type = "SystemAssigned"
+  }
+}
+
+resource "azurerm_log_analytics_linked_storage_account" "monitoring" {
+  data_source_type    = "Ingestion"
+  resource_group_name = azurerm_resource_group.cyclecloud.name
+  storage_account_ids = [azurerm_storage_account.monitoring.id]
+  workspace_id        = azurerm_log_analytics_workspace.cyclecloud.id
+}
+
+resource "azurerm_monitor_data_collection_endpoint" "cyclecloud" {
+  name                = "dce-${random_pet.naming.id}"
+  resource_group_name = azurerm_resource_group.cyclecloud.name
+  location            = var.location
+  kind                = "Linux"
+  tags                = local.common_tags
 }
 
 resource "azurerm_monitor_diagnostic_setting" "bastion_host" {
-  name               = "diag-${azurerm_bastion_host.cyclecloud.name}"
-  log_analytics_workspace_id = azurerm_log_analytics_workspace.cyclecloud.id
+  name                           = "diag-${azurerm_bastion_host.cyclecloud.name}"
+  log_analytics_workspace_id     = azurerm_log_analytics_workspace.cyclecloud.id
   log_analytics_destination_type = "Dedicated"
-  target_resource_id = azurerm_bastion_host.cyclecloud.id
+  target_resource_id             = azurerm_bastion_host.cyclecloud.id
 
   enabled_log {
     category = "BastionAuditLogs"
@@ -23,10 +42,10 @@ resource "azurerm_monitor_diagnostic_setting" "bastion_host" {
 }
 
 resource "azurerm_monitor_diagnostic_setting" "key_vault" {
-  name               = "diag-${azurerm_key_vault.cyclecloud.name}"
-  log_analytics_workspace_id = azurerm_log_analytics_workspace.cyclecloud.id
+  name                           = "diag-${azurerm_key_vault.cyclecloud.name}"
+  log_analytics_workspace_id     = azurerm_log_analytics_workspace.cyclecloud.id
   log_analytics_destination_type = "Dedicated"
-  target_resource_id = azurerm_key_vault.cyclecloud.id
+  target_resource_id             = azurerm_key_vault.cyclecloud.id
 
   enabled_log {
     category = "AuditEvent"
@@ -42,21 +61,21 @@ resource "azurerm_monitor_diagnostic_setting" "key_vault" {
 }
 
 resource "azurerm_monitor_diagnostic_setting" "nat_gateway" {
-  name               = "diag-${azurerm_nat_gateway.cyclecloud.name}"
-  log_analytics_workspace_id = azurerm_log_analytics_workspace.cyclecloud.id
+  name                           = "diag-${azurerm_nat_gateway.cyclecloud.name}"
+  log_analytics_workspace_id     = azurerm_log_analytics_workspace.cyclecloud.id
   log_analytics_destination_type = "Dedicated"
-  target_resource_id = azurerm_nat_gateway.cyclecloud.id
+  target_resource_id             = azurerm_nat_gateway.cyclecloud.id
 
-    enabled_metric {
+  enabled_metric {
     category = "AllMetrics"
   }
 }
 
 resource "azurerm_monitor_diagnostic_setting" "public_ip_bastion" {
-  name               = "diag-${azurerm_public_ip.bastion.name}"
-  log_analytics_workspace_id = azurerm_log_analytics_workspace.cyclecloud.id
+  name                           = "diag-${azurerm_public_ip.bastion.name}"
+  log_analytics_workspace_id     = azurerm_log_analytics_workspace.cyclecloud.id
   log_analytics_destination_type = "Dedicated"
-  target_resource_id = azurerm_public_ip.bastion.id
+  target_resource_id             = azurerm_public_ip.bastion.id
 
   enabled_log {
     category = "DDoSProtectionNotifications"
@@ -76,10 +95,10 @@ resource "azurerm_monitor_diagnostic_setting" "public_ip_bastion" {
 }
 
 resource "azurerm_monitor_diagnostic_setting" "public_ip_natgateway" {
-  name               = "diag-${azurerm_public_ip.natgateway.name}"
-  log_analytics_workspace_id = azurerm_log_analytics_workspace.cyclecloud.id
+  name                           = "diag-${azurerm_public_ip.natgateway.name}"
+  log_analytics_workspace_id     = azurerm_log_analytics_workspace.cyclecloud.id
   log_analytics_destination_type = "Dedicated"
-  target_resource_id = azurerm_public_ip.natgateway.id
+  target_resource_id             = azurerm_public_ip.natgateway.id
 
   enabled_log {
     category = "DDoSProtectionNotifications"
@@ -99,10 +118,10 @@ resource "azurerm_monitor_diagnostic_setting" "public_ip_natgateway" {
 }
 
 resource "azurerm_monitor_diagnostic_setting" "virtual_network" {
-  name               = "diag-${azurerm_virtual_network.cyclecloud.name}"
-  log_analytics_workspace_id = azurerm_log_analytics_workspace.cyclecloud.id
+  name                           = "diag-${azurerm_virtual_network.cyclecloud.name}"
+  log_analytics_workspace_id     = azurerm_log_analytics_workspace.cyclecloud.id
   log_analytics_destination_type = "Dedicated"
-  target_resource_id = azurerm_virtual_network.cyclecloud.id
+  target_resource_id             = azurerm_virtual_network.cyclecloud.id
 
   enabled_log {
     category = "VMProtectionAlerts"
@@ -111,4 +130,21 @@ resource "azurerm_monitor_diagnostic_setting" "virtual_network" {
   enabled_metric {
     category = "AllMetrics"
   }
+}
+
+resource "azurerm_role_assignment" "monitoring" {
+  principal_id         = azurerm_log_analytics_workspace.cyclecloud.identity[0].principal_id
+  role_definition_name = "Storage Data Table Contributor"
+  scope                = azurerm_storage_account.monitoring.id
+
+  depends_on = [azurerm_log_analytics_workspace.cyclecloud, azurerm_storage_account.monitoring]
+}
+
+resource "azurerm_storage_account" "monitoring" {
+  account_replication_type = "LRS"
+  account_tier             = "Standard"
+  location                 = var.location
+  name                     = substr("mon${random_pet.naming.id}", 0, 24)
+  resource_group_name      = azurerm_resource_group.cyclecloud.name
+  tags                     = local.common_tags
 }

@@ -20,7 +20,9 @@ Subscription
     ├── NAT Gateway  (attached to cluster subnet)
     ├── Key Vault  (RBAC-enabled, private endpoint)
     ├── Shared Image Gallery + Image Definition  (Ubuntu 24.04 DSVM)
-    ├── Log Analytics Workspace
+    ├── Log Analytics Workspace  (system-assigned identity)
+    ├── Azure Monitor Data Collection Endpoint  (Linux)
+    ├── Storage Account  (linked to Log Analytics for ingestion)
     ├── Azure Monitor Private Link Scope  (private endpoint)
     ├── User-Assigned Managed Identity
     └── Custom RBAC Role  (CycleCloud Orchestrator Role)
@@ -38,8 +40,12 @@ Subscription
 | `azurerm_key_vault` | Stores the VM password, SSH private key, and SSH public key generated at apply time |
 | `azurerm_shared_image_gallery` | Hosts custom CycleCloud image versions built by `2_packer_image` |
 | `azurerm_shared_image` | Image definition for `microsoft-dsvm / ubuntu-hpc / 2404` (Gen V2, NVMe-enabled) |
-| `azurerm_log_analytics_workspace` | Centralised log sink (PerGB2018, 30-day retention) |
+| `azurerm_log_analytics_workspace` | Centralised log sink (PerGB2018, 30-day retention, system-assigned identity) |
+| `azurerm_log_analytics_linked_storage_account` | Links the monitoring storage account to the workspace for ingestion |
+| `azurerm_monitor_data_collection_endpoint` | Linux DCE used by data collection rules targeting the workspace |
 | `azurerm_monitor_private_link_scope` | Private connectivity to Azure Monitor services |
+| `azurerm_storage_account` (`monitoring`) | Customer-managed storage backing Log Analytics ingestion (Standard LRS) |
+| `azurerm_role_assignment` (`monitoring`) | Grants the workspace identity `Storage Data Table Contributor` on the monitoring storage account |
 | `azurerm_user_assigned_identity` | Managed identity used by the CycleCloud VM |
 | `azurerm_role_definition` | Least-privilege custom role granting CycleCloud the permissions it needs |
 

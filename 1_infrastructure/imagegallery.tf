@@ -1,6 +1,6 @@
 resource "azurerm_shared_image_gallery" "cyclecloud" {
     location = var.location
-    name = "sig${random_pet.naming.id}"
+    name = substr("sig${random_pet.naming.id}", 0, 24)
     resource_group_name = azurerm_resource_group.cyclecloud.name
     description = "Shared Image Gallery for CycleCloud"
     tags = local.common_tags
