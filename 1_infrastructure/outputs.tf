@@ -77,3 +77,8 @@ output "log_analytics_workspace_workspace_id" {
   description = "The Workspace ID of the Log Analytics Workspace (for agent configuration)"
   value       = azurerm_log_analytics_workspace.cyclecloud.workspace_id
 }
+
+output "bastion_host_name" {
+  description = "The name of the Bastion host"
+  value       = azurerm_bastion_host.cyclecloud.name
+}
