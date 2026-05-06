@@ -52,7 +52,7 @@ variable "subnets" {
       name                              = "CycleCloud"
     }
     private_endpoints = {
-      address_prefix                    = "10.100.2.128/28"
+      address_prefix                    = "10.100.2.128/27"
       name                              = "PrivateEndpoints"
     }
     shared = {

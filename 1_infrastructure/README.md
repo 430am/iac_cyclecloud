@@ -10,14 +10,14 @@ in the same subscription without name collisions.
 Subscription
 └── Resource Group  (rg-<suffix>)
     ├── Virtual Network  (vnet-<suffix>)
-    │   ├── AzureBastionSubnet          10.100.0.0/26
-    │   ├── 0-anf                       10.100.0.64/26
-    │   ├── 1-shared                    10.100.0.128/27
-    │   ├── 2-private-endpoints         10.100.0.160/28
-    │   ├── 3-cyclecloud                10.100.0.176/29
-    │   └── 4-cluster                   10.100.2.0/23
+    │   ├── AzureBastionSubnet          10.100.2.0/26
+    │   ├── Storage (ANF)               10.100.2.64/26
+    │   ├── PrivateEndpoints            10.100.2.128/27
+    │   ├── CycleCloud                  10.100.2.192/27
+    │   ├── SharedServices              10.100.2.224/27
+    │   └── Cluster                     10.100.0.0/23
     ├── Azure Bastion  (Standard SKU, tunneling enabled)
-    ├── NAT Gateway  (attached to cluster subnet)
+    ├── NAT Gateway  (attached to cluster, cyclecloud, and shared subnets)
     ├── Key Vault  (RBAC-enabled, private endpoint)
     ├── Shared Image Gallery + Image Definition  (Ubuntu 24.04 DSVM)
     ├── Log Analytics Workspace  (system-assigned identity)
@@ -36,7 +36,7 @@ Subscription
 | `azurerm_virtual_network` | VNet with configurable address space (default `10.100.0.0/16`) |
 | `azurerm_subnet` | Six subnets serving Bastion, ANF, shared services, private endpoints, CycleCloud, and cluster nodes |
 | `azurerm_bastion_host` | Standard-SKU Bastion with copy-paste and native client tunnelling |
-| `azurerm_nat_gateway` | Outbound internet connectivity for cluster subnet; no public IP on cluster VMs required |
+| `azurerm_nat_gateway` | Outbound internet connectivity for cluster, cyclecloud, and shared subnets |
 | `azurerm_key_vault` | Stores the VM password, SSH private key, and SSH public key generated at apply time |
 | `azurerm_shared_image_gallery` | Hosts custom CycleCloud image versions built by `2_packer_image` |
 | `azurerm_shared_image` | Image definition for `microsoft-dsvm / ubuntu-hpc / 2404` (Gen V2, NVMe-enabled) |
@@ -44,8 +44,9 @@ Subscription
 | `azurerm_log_analytics_linked_storage_account` | Links the monitoring storage account to the workspace for ingestion |
 | `azurerm_monitor_data_collection_endpoint` | Linux DCE used by data collection rules targeting the workspace |
 | `azurerm_monitor_private_link_scope` | Private connectivity to Azure Monitor services |
-| `azurerm_storage_account` (`monitoring`) | Customer-managed storage backing Log Analytics ingestion (Standard LRS) |
-| `azurerm_role_assignment` (`monitoring`) | Grants the workspace identity `Storage Data Table Contributor` on the monitoring storage account |
+| `azurerm_storage_account` (`monitoring`) | Customer-managed storage backing Log Analytics ingestion (Standard LRS, key access disabled, Deny default + AzureServices/Logging/Metrics bypass) |
+| `azurerm_role_assignment` (`monitoring`) | Grants the workspace identity `Storage Table Data Contributor` and `Storage Blob Data Contributor` on the monitoring storage account |
+| `azurerm_private_endpoint` (`kv`, `ampls`, `linked_storage`) | Private endpoints for Key Vault, Azure Monitor Private Link Scope, and the monitoring storage account (blob) |
 | `azurerm_user_assigned_identity` | Managed identity used by the CycleCloud VM |
 | `azurerm_role_definition` | Least-privilege custom role granting CycleCloud the permissions it needs |
 

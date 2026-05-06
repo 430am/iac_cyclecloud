@@ -16,6 +16,13 @@ resource "azurerm_log_analytics_linked_storage_account" "monitoring" {
   resource_group_name = azurerm_resource_group.cyclecloud.name
   storage_account_ids = [azurerm_storage_account.monitoring.id]
   workspace_id        = azurerm_log_analytics_workspace.cyclecloud.id
+
+  depends_on = [ azurerm_role_assignment.monitoring, time_sleep.linked_storage_wait ]
+}
+
+resource "time_sleep" "linked_storage_wait" {
+    create_duration = "60s"
+    depends_on = [ azurerm_role_assignment.monitoring ]
 }
 
 resource "azurerm_monitor_data_collection_endpoint" "cyclecloud" {
@@ -133,8 +140,10 @@ resource "azurerm_monitor_diagnostic_setting" "virtual_network" {
 }
 
 resource "azurerm_role_assignment" "monitoring" {
+  for_each = toset(["Storage Table Data Contributor", "Storage Blob Data Contributor"])
+
   principal_id         = azurerm_log_analytics_workspace.cyclecloud.identity[0].principal_id
-  role_definition_name = "Storage Data Table Contributor"
+  role_definition_name = each.key
   scope                = azurerm_storage_account.monitoring.id
 
   depends_on = [azurerm_log_analytics_workspace.cyclecloud, azurerm_storage_account.monitoring]
@@ -147,4 +156,12 @@ resource "azurerm_storage_account" "monitoring" {
   name                     = substr("mon${random_pet.naming.id}", 0, 24)
   resource_group_name      = azurerm_resource_group.cyclecloud.name
   tags                     = local.common_tags
+  shared_access_key_enabled = false
+  allow_nested_items_to_be_public = false
+  public_network_access_enabled = true
+
+  network_rules {
+    default_action = "Deny"
+    bypass = [ "AzureServices", "Logging", "Metrics" ]
+  }
 }

@@ -55,7 +55,17 @@ resource "azurerm_subnet" "cyclecloud" {
 
 resource "azurerm_subnet_nat_gateway_association" "cyclecloud" {
   nat_gateway_id = azurerm_nat_gateway.cyclecloud.id
+  subnet_id      = azurerm_subnet.cyclecloud["cyclecloud"].id
+}
+
+resource "azurerm_subnet_nat_gateway_association" "cluster" {
+  nat_gateway_id = azurerm_nat_gateway.cyclecloud.id
   subnet_id      = azurerm_subnet.cyclecloud["cluster"].id
+}
+
+resource "azurerm_subnet_nat_gateway_association" "shared" {
+  nat_gateway_id = azurerm_nat_gateway.cyclecloud.id
+  subnet_id      = azurerm_subnet.cyclecloud["shared"].id
 }
 
 resource "azurerm_virtual_network" "cyclecloud" {
