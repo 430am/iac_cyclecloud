@@ -29,12 +29,16 @@ in the Shared Image Gallery created by `1_infrastructure`.
 | `location` | no | `southcentralus` | Region for the temporary build VM |
 | `build_vm_size` | no | `Standard_D4ads_v6` | VM size for the Packer build agent |
 | `ssh_username` | no | `azureuser` | SSH user Packer uses to connect |
-| `image_version` | no | `1.0.0` | SIG image version to publish (`major.minor.patch`) |
+| `image_version` | no | `""` | Optional SIG image version override (`major.minor.patch`); when unset a unique timestamp-based version is generated each build |
 | `sig_resource_group_name` | yes | — | Resource group containing the SIG |
 | `sig_name` | yes | — | Shared Image Gallery name |
 | `sig_image_name` | yes | — | Image definition name within the gallery |
 | `replication_regions` | no | `["southcentralus"]` | Regions to replicate the image version to |
 | `sig_storage_account_type` | no | `Standard_LRS` | Storage tier for the image version artifacts |
+| `key_vault_name` | yes | `""` | Key Vault name from `1_infrastructure` |
+| `key_vault_password_secret_name` | yes | `""` | Secret name containing `CCPASSWORD` |
+| `cyclecloud_tenant_id` | conditional | `""` | Tenant ID used in the generated CycleCloud account file (required if `tenant_id` is unset) |
+| `cyclecloud_account_name` | no | `default` | CycleCloud account name created during build |
 | `use_azure_cli_auth` | no | `true` | Authenticate with `az login` session |
 | `tenant_id` | no | `""` | Tenant ID (service principal auth only) |
 | `client_id` | no | `""` | Client ID (service principal auth only) |
@@ -64,9 +68,13 @@ cd ../1_infrastructure/
 RG_NAME=$(terraform output -raw resource_group_name)
 SIG_NAME=$(terraform output -raw sig_name)
 SIG_IMAGE_NAME=$(terraform output -raw sig_image_name)
+KV_NAME=$(terraform output -raw key_vault_name)
+KV_PASSWORD_SECRET=$(terraform output -raw key_vault_password_secret_name)
 echo "sig_resource_group_name = \"$RG_NAME\""
 echo "sig_name                = \"$SIG_NAME\""
 echo "sig_image_name          = \"$SIG_IMAGE_NAME\""
+echo "key_vault_name                = \"$KV_NAME\""
+echo "key_vault_password_secret_name = \"$KV_PASSWORD_SECRET\""
 ```
 
 ### 3. Create a local var file
@@ -82,6 +90,9 @@ subscription_id         = "<your-subscription-id>"
 sig_resource_group_name = "<rg-name from step 2>"
 sig_name                = "<sig-name from step 2>"
 sig_image_name          = "<image-name from step 2>"
+key_vault_name                = "<key-vault-name from step 2>"
+key_vault_password_secret_name = "<password-secret-name from step 2>"
+cyclecloud_tenant_id          = "<tenant-id>"
 ```
 
 ### 4. Initialise and build
@@ -98,8 +109,8 @@ packer build    -var-file=environments/creds.pkrvars.hcl .
 
 ### Updating an existing image
 
-Increment `image_version` in your var file (e.g. `1.0.1`) and re-run `packer build`.
-Each run creates a new SIG image version alongside any existing ones.
+By default, each run auto-generates a unique image version in the format `YYYYMMDD.HHMM.SS`.
+If you need deterministic versioning, set `image_version` explicitly in your var file (for example `1.0.1`) and re-run `packer build`.
 
 ## Files
 

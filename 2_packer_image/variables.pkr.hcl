@@ -47,9 +47,9 @@ variable "ssh_username" {
 }
 
 variable "image_version" {
-  description = "Version for the image published to the Shared Image Gallery."
+  description = "Optional explicit SIG image version (major.minor.patch). Leave empty to auto-generate per build."
   type        = string
-  default     = "1.0.0"
+  default     = ""
 }
 
 variable "sig_resource_group_name" {
@@ -77,4 +77,28 @@ variable "sig_storage_account_type" {
   description = "Storage type for the SIG image version artifacts."
   type        = string
   default     = "Standard_LRS"
+}
+
+variable "key_vault_name" {
+  description = "Name of the Key Vault created by 1_infrastructure."
+  type        = string
+  default     = ""
+}
+
+variable "key_vault_password_secret_name" {
+  description = "Name of the Key Vault secret that stores the CycleCloud admin password (CCPASSWORD)."
+  type        = string
+  default     = ""
+}
+
+variable "cyclecloud_tenant_id" {
+  description = "Tenant ID to write into the CycleCloud Azure account file. If unset, tenant_id is used."
+  type        = string
+  default     = ""
+}
+
+variable "cyclecloud_account_name" {
+  description = "Name for the CycleCloud Azure account created during image build."
+  type        = string
+  default     = "default"
 }

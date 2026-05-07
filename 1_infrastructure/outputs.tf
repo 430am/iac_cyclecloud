@@ -23,6 +23,11 @@ output "key_vault_public_key_secret_name" {
   value       = azurerm_key_vault_secret.public_key.name
 }
 
+output "key_vault_password_secret_name" {
+  description = "The secret name storing the CycleCloud admin password"
+  value       = azurerm_key_vault_secret.password.name
+}
+
 output "resource_group_id" {
   description = "The ID of the Resource Group"
   value       = azurerm_resource_group.cyclecloud.id
