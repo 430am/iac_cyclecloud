@@ -78,15 +78,3 @@ variable "sig_storage_account_type" {
   type        = string
   default     = "Standard_LRS"
 }
-
-variable "cyclecloud_tenant_id" {
-  description = "Tenant ID to write into the CycleCloud Azure account file. If unset, tenant_id is used."
-  type        = string
-  default     = ""
-}
-
-variable "cyclecloud_account_name" {
-  description = "Name for the CycleCloud Azure account created during image build."
-  type        = string
-  default     = "default"
-}
