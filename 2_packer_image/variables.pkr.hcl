@@ -79,18 +79,6 @@ variable "sig_storage_account_type" {
   default     = "Standard_LRS"
 }
 
-variable "key_vault_name" {
-  description = "Name of the Key Vault created by 1_infrastructure."
-  type        = string
-  default     = ""
-}
-
-variable "key_vault_password_secret_name" {
-  description = "Name of the Key Vault secret that stores the CycleCloud admin password (CCPASSWORD)."
-  type        = string
-  default     = ""
-}
-
 variable "cyclecloud_tenant_id" {
   description = "Tenant ID to write into the CycleCloud Azure account file. If unset, tenant_id is used."
   type        = string

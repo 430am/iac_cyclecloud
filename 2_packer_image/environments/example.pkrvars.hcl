@@ -11,8 +11,6 @@ sig_name                = "sig<random-suffix>"
 sig_image_name          = "image-<random-suffix>"
 # Optional: set explicitly, otherwise the template auto-generates a unique timestamp version.
 # image_version           = "20260506.1405.12"
-key_vault_name                = "kv<random-suffix>"
-key_vault_password_secret_name = "cc-<random-suffix>-password"
 cyclecloud_tenant_id          = "00000000-0000-0000-0000-000000000000"
 cyclecloud_account_name       = "default"
 
