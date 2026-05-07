@@ -11,9 +11,11 @@ in the Shared Image Gallery created by `1_infrastructure`.
 3. Updates the system and installs base packages (`curl`, `gnupg`, `jq`, `lsb-release`, `openjdk-8-jre`, etc.).
 4. Installs **Azure CLI** via the official Microsoft install script.
 5. Adds the Microsoft `packages.microsoft.com/repos/cyclecloud stable` repository (signed-by `/etc/apt/keyrings/microsoft.gpg`), pins openjdk-8 as the system default with `update-java-alternatives`, then installs **CycleCloud** (`cyclecloud8` or `cyclecloud`).
-6. Writes `/opt/cycle_server/config/java_home = /usr/lib/jvm/java-8-openjdk-amd64` so a future default-Java change won't break CycleCloud.
-7. Cleans apt caches, runs `waagent -deprovision+user` and `cloud-init clean` to generalise the VM.
-8. Publishes the resulting image version to the target Shared Image Gallery definition.
+6. Resolves `CCPASSWORD` from Key Vault through the Packer `azure-keyvaultsecret` data source (build-host side), avoiding in-VM `az login` dependencies.
+7. Installs the CycleCloud CLI, initializes it against `http://localhost:8080`, and applies a fallback `~/.cycle/config.ini` if metadata-based initialization does not succeed immediately.
+8. Writes `/opt/cycle_server/config/java_home = /usr/lib/jvm/java-8-openjdk-amd64` so a future default-Java change won't break CycleCloud.
+9. Cleans apt caches, runs `waagent -deprovision+user` and `cloud-init clean` to generalise the VM.
+10. Publishes the resulting image version to the target Shared Image Gallery definition.
 
 ## Prerequisites
 

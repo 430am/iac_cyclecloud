@@ -34,6 +34,22 @@ source "azure-arm" "cyclecloud_server" {
   }
 }
 
+data "azure-keyvaultsecret" "cyclecloud_password" {
+  use_azure_cli_auth = var.use_azure_cli_auth
+
+  subscription_id = var.subscription_id
+  tenant_id       = var.tenant_id != "" ? var.tenant_id : null
+  client_id       = var.client_id != "" ? var.client_id : null
+  client_secret   = var.client_secret != "" ? var.client_secret : null
+
+  vault_name  = var.key_vault_name
+  secret_name = var.key_vault_password_secret_name
+}
+
+locals {
+  cyclecloud_password_b64 = base64encode(data.azure-keyvaultsecret.cyclecloud_password.value)
+}
+
 build {
   name    = "cyclecloud-server"
   sources = ["source.azure-arm.cyclecloud_server"]
@@ -96,10 +112,10 @@ build {
   provisioner "shell" {
     execute_command = "chmod +x {{ .Path }}; {{ .Vars }} sudo -E bash '{{ .Path }}'"
     inline = [
-      "set -euxo pipefail",
+      "set -euo pipefail",
       "apt-get update -y",
       "apt-get install -yq unzip python3-venv",
-      "CCPASSWORD=$(az keyvault secret show --vault-name \"${var.key_vault_name}\" --name \"${var.key_vault_password_secret_name}\" --query value --output tsv)",
+      "CCPASSWORD=$(printf '%s' '${local.cyclecloud_password_b64}' | base64 -d)",
       "if [ -z \"$CCPASSWORD\" ]; then echo 'CCPASSWORD retrieved from Key Vault is empty.' >&2; exit 1; fi",
       "escaped_CCPASSWORD=$(printf '%s\n' \"$CCPASSWORD\" | sed -e 's/[\\/&]/\\\\&/g')",
       "cat >/tmp/cyclecloud_account.json <<'EOF'\n[\n  {\n    \"AdType\": \"Application.Setting\",\n    \"Name\": \"cycleserver.installation.initial_user\",\n    \"Value\": \"${var.ssh_username}\"\n  },\n  {\n    \"AdType\": \"AuthenticatedUser\",\n    \"Name\": \"${var.ssh_username}\",\n    \"RawPassword\": \"CCPASSWORD_PLACEHOLDER\",\n    \"Superuser\": true\n  },\n  {\n    \"AdType\": \"Application.Setting\",\n    \"Name\": \"cycleserver.installation.complete\",\n    \"Value\": true\n  }\n]\nEOF",
@@ -109,7 +125,9 @@ build {
       "/opt/cycle_server/cycle_server await_startup",
       "unzip -o /opt/cycle_server/tools/cyclecloud-cli.zip -d /tmp",
       "python3 /tmp/cyclecloud-cli-installer/install.py -y --installdir /home/${var.ssh_username}/.cycle --system",
-      "CCPASSWORD=\"$CCPASSWORD\" runuser -l ${var.ssh_username} -c '/usr/local/bin/cyclecloud initialize --loglevel=debug --batch --url=http://localhost:8080 --verify-ssl=false --username=${var.ssh_username} --password=\"$CCPASSWORD\"'",
+      "initialize_ok=false",
+      "for i in $(seq 1 12); do if CCPASSWORD=\"$CCPASSWORD\" runuser -l ${var.ssh_username} -c '/usr/local/bin/cyclecloud initialize --loglevel=debug --batch --url=http://localhost:8080 --verify-ssl=false --username=${var.ssh_username} --password=\"$CCPASSWORD\"'; then initialize_ok=true; break; fi; echo 'cyclecloud initialize attempt failed; retrying...'; sleep 10; done",
+      "if [ \"$initialize_ok\" != \"true\" ]; then install -d -m 0700 -o ${var.ssh_username} -g ${var.ssh_username} /home/${var.ssh_username}/.cycle; cat >/home/${var.ssh_username}/.cycle/config.ini <<EOF\n[cyclecloud]\nurl = http://localhost:8080\nusername = ${var.ssh_username}\npassword = $CCPASSWORD\nverify_certificates = false\nverify-ssl = false\nEOF\nchmod 0600 /home/${var.ssh_username}/.cycle/config.ini\nchown ${var.ssh_username}:${var.ssh_username} /home/${var.ssh_username}/.cycle/config.ini; fi",
       "effective_tenant_id=\"${var.cyclecloud_tenant_id}\"",
       "if [ -z \"$effective_tenant_id\" ] && [ -n \"${var.tenant_id}\" ]; then effective_tenant_id=\"${var.tenant_id}\"; fi",
       "if [ -z \"$effective_tenant_id\" ]; then echo 'cyclecloud_tenant_id (or tenant_id) must be set to create the CycleCloud account file.' >&2; exit 1; fi",
