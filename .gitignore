@@ -49,3 +49,6 @@ override.tf.json
 
 # working directory
 working/
+
+# Ignore any Copilot Instructions files
+.github/instructions/*
