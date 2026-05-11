@@ -10,6 +10,12 @@ resource "azurerm_key_vault" "cyclecloud" {
   enabled_for_deployment     = true
   rbac_authorization_enabled = true
   tags                       = local.common_tags
+
+  network_acls {
+    default_action = "Deny"
+    bypass         = "AzureServices"
+    ip_rules       = local.effective_ip_allowlist
+  }
 }
 
 resource "azurerm_key_vault_secret" "password" {

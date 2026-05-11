@@ -162,6 +162,7 @@ resource "azurerm_storage_account" "monitoring" {
 
   network_rules {
     default_action = "Deny"
-    bypass = [ "AzureServices", "Logging", "Metrics" ]
+    bypass         = ["AzureServices", "Logging", "Metrics"]
+    ip_rules       = local.effective_ip_allowlist
   }
 }
