@@ -72,15 +72,6 @@ variable "tags" {
   }
 }
 
-variable "vm_skus" {
-  description = "The VM SKUs for the virtual machines."
-  type        = map(string)
-  default = {
-    cyclecloud = "Standard_D4ads_v6"
-    imaging    = "Standard_D2ads_v6"
-  }
-}
-
 variable "vnet_address_space" {
   description = "The address space for the virtual network."
   type        = list(string)

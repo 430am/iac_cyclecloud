@@ -6,6 +6,7 @@ Terraform configuration that deploys the CycleCloud runtime layer on top of the 
 ## What this stage creates
 
 - A CycleCloud server VM in the existing `CycleCloud` subnet, using the custom Shared Image Gallery image.
+- A Standard SKU static public IP attached to the CycleCloud VM NIC for direct access to the CycleCloud web portal and SSH (in addition to the existing Bastion path).
 - The CycleCloud VM authenticates via SSH public key read from the Key Vault created in `1_infrastructure`.
 - A blob storage account and private container for CycleLocker.
 - A private endpoint for the CycleLocker blob service in the existing `PrivateEndpoints` subnet.
@@ -58,6 +59,7 @@ terraform apply -var-file=environments/creds.tfvars
 This stage returns:
 
 - CycleCloud VM ID and private IP
+- CycleCloud VM public IP address (`cyclecloud_public_ip`)
 - Key Vault secret name used for the CycleCloud SSH public key
 - CycleLocker storage account name
 - ANF mount target IPs for `/sched` and `/share`

@@ -18,14 +18,6 @@ resource "azurerm_key_vault" "cyclecloud" {
   }
 }
 
-resource "azurerm_key_vault_secret" "password" {
-  depends_on = [azurerm_role_assignment.kv_admin]
-
-  key_vault_id = azurerm_key_vault.cyclecloud.id
-  name         = "cc-${random_pet.naming.id}-password"
-  value        = random_password.vm_password.result
-}
-
 resource "azurerm_key_vault_secret" "private_key" {
   depends_on = [azurerm_role_assignment.kv_admin]
 

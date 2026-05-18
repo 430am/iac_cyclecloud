@@ -15,9 +15,9 @@ resource "azurerm_shared_image" "cyclecloud" {
     resource_group_name = azurerm_resource_group.cyclecloud.name
     
     identifier {
-        offer = "ubuntu-hpc"
-        publisher = "microsoft-dsvm"
-        sku = "2404"
+        offer = "ubuntu-24_04-lts"
+        publisher = "Canonical"
+        sku = "server"
     }
     
     description = "Shared Image for CycleCloud installed on Ubuntu 24.04"

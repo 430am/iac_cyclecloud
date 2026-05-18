@@ -8,6 +8,7 @@ resource "azurerm_network_interface" "cyclecloud" {
     name                          = "ipconfig1"
     private_ip_address_allocation = "Dynamic"
     subnet_id                     = data.azurerm_subnet.cyclecloud.id
+    public_ip_address_id          = azurerm_public_ip.cyclecloud.id
   }
 }
 
@@ -35,4 +36,13 @@ resource "azurerm_linux_virtual_machine" "cyclecloud" {
   identity {
     type = "SystemAssigned"
   }
+}
+
+resource "azurerm_public_ip" "cyclecloud" {
+  allocation_method   = "Static"
+  location            = local.effective_location
+  name                = "pip-cc-${random_pet.naming.id}"
+  resource_group_name = data.azurerm_resource_group.foundation.name
+  sku                 = "Standard"
+  tags                = local.common_tags
 }

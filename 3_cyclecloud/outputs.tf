@@ -13,6 +13,11 @@ output "cyclecloud_private_ip" {
   value       = azurerm_network_interface.cyclecloud.private_ip_address
 }
 
+output "cyclecloud_public_ip" {
+  description = "Public IP address assigned to the CycleCloud server NIC."
+  value       = azurerm_public_ip.cyclecloud.ip_address
+}
+
 output "cyclecloud_public_key_secret_name" {
   description = "Key Vault secret name used for the CycleCloud VM SSH public key."
   value       = local.foundation_public_key_secret_name
