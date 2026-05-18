@@ -34,6 +34,7 @@ override.tf.json
 !*.example.tfvars.json
 !1_infrastructure/environments/example.tfvars
 !2_packer_image/environments/example.pkrvars.hcl
+!3_cyclecloud/environments/example.tfvars
 
 # Common secret files
 .env
