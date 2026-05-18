@@ -16,9 +16,9 @@ source "azure-arm" "cyclecloud_server" {
   client_secret   = var.client_secret != "" ? var.client_secret : null
 
   os_type         = "Linux"
-  image_publisher = "Canonical"
-  image_offer     = "ubuntu-24_04-lts"
-  image_sku       = "server"
+  image_publisher = "microsoft-dsvm"
+  image_offer     = "ubuntu-hpc"
+  image_sku       = "2404"
 
   location                = var.location
   vm_size                 = var.build_vm_size
