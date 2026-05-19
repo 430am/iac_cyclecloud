@@ -46,3 +46,36 @@ resource "azurerm_public_ip" "cyclecloud" {
   sku                 = "Standard"
   tags                = local.common_tags
 }
+
+data "http" "client_ip" {
+  url = "https://api.ipify.org"
+}
+
+locals {
+  client_ip_cidr = "${trimspace(data.http.client_ip.response_body)}/32"
+}
+
+resource "azurerm_network_security_group" "cyclecloud" {
+  location            = local.effective_location
+  name                = "nsg-cc-${random_pet.naming.id}"
+  resource_group_name = data.azurerm_resource_group.foundation.name
+  tags                = local.common_tags
+
+  security_rule {
+    name                       = "AllowClientInbound"
+    priority                   = 100
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_ranges    = ["22", "443", "8080", "8443"]
+    source_address_prefix      = local.client_ip_cidr
+    destination_address_prefix = "*"
+  }
+}
+
+resource "azurerm_network_interface_security_group_association" "cyclecloud" {
+  network_interface_id      = azurerm_network_interface.cyclecloud.id
+  network_security_group_id = azurerm_network_security_group.cyclecloud.id
+}
+
